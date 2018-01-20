@@ -1,0 +1,3 @@
+class Database {
+    public Database() {}
+}
