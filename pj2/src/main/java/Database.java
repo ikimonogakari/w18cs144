@@ -1,3 +1,0 @@
-class Database {
-    public Database() {}
-}
