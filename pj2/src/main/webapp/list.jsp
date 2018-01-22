@@ -8,7 +8,7 @@ username_quot = """ + username_quot + """;
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Post List</title>
+    <title>List Post</title>
 </head>
 <body>
     <div>
@@ -42,7 +42,7 @@ username_quot = """ + username_quot + """;
                 out.print("<button type="submit" name="action" value="open">Open</button>\n");
                 out.print("<button type="submit" name="action" value="delete">Delete</button>\n");
                 out.print("</td>\n");
-                out.print("</form>\n")
+                out.print("</form>\n");
                 out.print("</tr>\n");
             }
         %>
