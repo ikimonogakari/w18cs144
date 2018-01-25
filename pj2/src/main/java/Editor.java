@@ -1,5 +1,8 @@
+import blog.*;
+
 import java.io.IOException;
 import java.sql.* ;
+import java.util.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
@@ -55,9 +58,10 @@ public class Editor extends HttpServlet {
         throws ServletException, IOException 
     {
         String action = String.valueOf(request.getAttribute("action"));
+        String statusCode = "";
         if(action.equals("open")){
             handleOpen(request, response);
-            String statusCode = request.getAttribute("status");
+            statusCode = String.valueOf(request.getAttribute("status"));
             if(!statusCode.equals("o0")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
             } else {
@@ -93,9 +97,10 @@ public class Editor extends HttpServlet {
         throws ServletException, IOException 
     {
         String action = String.valueOf(request.getAttribute("action"));
+        String statusCode = "";
         if(action.equals("open")){
             handleOpen(request, response);
-            String statusCode = request.getAttribute("status");
+            statusCode = String.valueOf(request.getAttribute("status"));
             if(!statusCode.equals("o0")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
             } else {
@@ -154,7 +159,7 @@ public class Editor extends HttpServlet {
     o3 stands for postid < 0, coresponding condition is "new post"
     */
     public void handleOpen(HttpServletRequest request, HttpServletResponse response){
-        Sting username = String.valueOf(request.getAttribute("username"));
+        String username = String.valueOf(request.getAttribute("username"));
         String postid = String.valueOf(request.getAttribute("postid"));
         if(username == null || username.trim().length() == 0){
             request.setAttribute("status", "o1");
@@ -179,7 +184,10 @@ public class Editor extends HttpServlet {
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
         } catch (ClassNotFoundException ex){
-            e.printStackTrace("Cannot find JDBC Driver.");
+            ex.printStackTrace();
+            //  "Cannot find JDBC Driver."
+        } catch (InstantiationException ex) {
+            ex.printStackTrace();
         }
         Connection conn = null;
         ResultSet rs = null;
@@ -235,7 +243,10 @@ public class Editor extends HttpServlet {
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
         } catch (ClassNotFoundException ex){
-            e.printStackTrace("Cannot find JDBC Driver.");
+            ex.printStackTrace();
+            //  "Cannot find JDBC Driver."
+        } catch (InstantiationException ex) {
+            ex.printStackTrace();
         }
         Connection conn = null;
         ResultSet rs = null;
@@ -332,7 +343,10 @@ public class Editor extends HttpServlet {
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
         } catch (ClassNotFoundException ex){
-            e.printStackTrace("Cannot find JDBC Driver.");
+            ex.printStackTrace();
+            //  "Cannot find JDBC Driver."
+        } catch (InstantiationException ex) {
+            ex.printStackTrace();
         }
         Connection conn = null;
         ResultSet rs = null;
@@ -342,7 +356,7 @@ public class Editor extends HttpServlet {
             String sql = "DELETE * FROM Posts WHERE username = ? AND postid = ?";
             pst = conn.prepareStatement(sql);
             pst.setString(1, username);
-            pst.setInt(2, Integer.parseInt(postid))
+            pst.setInt(2, Integer.parseInt(postid));
             rs = pst.executeQuery();
             request.setAttribute("status", "d0");
         } catch (SQLException ex){
@@ -389,15 +403,10 @@ public class Editor extends HttpServlet {
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
         } catch (ClassNotFoundException ex){
-            e.printStackTrace("Cannot find JDBC Driver.");
-        }
-        Connection conn = null;
-        ResultSet rs = null;
-        PreparedStatement pst = null;
-        try{
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-        } catch (ClassNotFoundException ex){
-            e.printStackTrace("Cannot find JDBC Driver.");
+            ex.printStackTrace();
+            //  "Cannot find JDBC Driver."
+        } catch (InstantiationException ex) {
+            ex.printStackTrace();
         }
         Connection conn = null;
         ResultSet rs = null;
@@ -417,7 +426,7 @@ public class Editor extends HttpServlet {
             }
             Calendar cld = Calendar.getInstance();
             java.util.Date now = cld.getTime();
-            java.sql.Timestamp currStamp = new java.util.Timestamp(now.getTime());
+            java.sql.Timestamp currStamp = new java.sql.Timestamp(now.getTime());
             String sql = null;
             if(newPost){
                 sql = "INSERT INTO Posts (username, postid, title, body, modified, created) VALUES (?, ?, ?, ?, ?,)";
@@ -458,15 +467,3 @@ public class Editor extends HttpServlet {
         return;
     }
 }
-
-class Blog{
-    String username;
-    int postid;
-    String title;
-    String body;
-    String created;
-    String modified;
-    public Blog();
-}
-
-
