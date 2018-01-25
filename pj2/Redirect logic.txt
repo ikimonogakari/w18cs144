@@ -1,0 +1,14 @@
+Redirect logic:
+edit.jsp:
+  open => edit.jsp
+  new post => edit.jsp
+  close preview => edit.jsp
+
+list.jsp
+  save, close, delete in edit.jsp => list.jsp
+  delete in list page => list.jsp
+
+need a page named error.jsp, show error message according to the status code.
+
+
+
