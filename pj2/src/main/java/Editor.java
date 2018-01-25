@@ -183,11 +183,9 @@ public class Editor extends HttpServlet {
 
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
-        } catch (ClassNotFoundException ex){
+        } catch (Exception ex){
             ex.printStackTrace();
             //  "Cannot find JDBC Driver."
-        } catch (InstantiationException ex) {
-            ex.printStackTrace();
         }
         Connection conn = null;
         ResultSet rs = null;
@@ -242,10 +240,7 @@ public class Editor extends HttpServlet {
         }
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
-        } catch (ClassNotFoundException ex){
-            ex.printStackTrace();
-            //  "Cannot find JDBC Driver."
-        } catch (InstantiationException ex) {
+        } catch (Exception ex){
             ex.printStackTrace();
         }
         Connection conn = null;
@@ -308,6 +303,14 @@ public class Editor extends HttpServlet {
             request.setAttribute("status", "p2");
             return;
         }
+        Parser parser = Parser.builder().build();
+        Node titleN = parser.parse(title);
+        Node bodyN = parser.parse(body);
+        HtmlRenderer renderer = HtmlRenderer.builder().escapeHtml(true).build();
+        String title_html = renderer.render(titleN);
+        String body_html = renderer.render(bodyN);
+        request.setAttribute("title_html", title_html);
+        request.setAttribute("body_html", body_html);
         Blog blog = new Blog();
         blog.username = username;
         blog.postid = Integer.parseInt(postid);
@@ -342,10 +345,7 @@ public class Editor extends HttpServlet {
         // valid request
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
-        } catch (ClassNotFoundException ex){
-            ex.printStackTrace();
-            //  "Cannot find JDBC Driver."
-        } catch (InstantiationException ex) {
+        } catch (Exception ex){
             ex.printStackTrace();
         }
         Connection conn = null;
@@ -402,11 +402,9 @@ public class Editor extends HttpServlet {
         // valid request
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
-        } catch (ClassNotFoundException ex){
+        } catch (Exception ex){
             ex.printStackTrace();
             //  "Cannot find JDBC Driver."
-        } catch (InstantiationException ex) {
-            ex.printStackTrace();
         }
         Connection conn = null;
         ResultSet rs = null;
