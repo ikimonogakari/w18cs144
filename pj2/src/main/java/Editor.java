@@ -69,6 +69,7 @@ public class Editor extends HttpServlet {
             }
         } else if(action.equals("list")){
             handleList(request, response);
+            statusCode = String.valueOf(request.getAttribute("status"));
             if(!statusCode.equals("L0")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
             } else {
@@ -76,6 +77,7 @@ public class Editor extends HttpServlet {
             }
         } else if(action.equals("preview")){
             handleList(request, response);
+            statusCode = String.valueOf(request.getAttribute("status"));
             if(!statusCode.equals("p0")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
             } else {
@@ -108,6 +110,7 @@ public class Editor extends HttpServlet {
             }
         } else if(action.equals("list")){
             handleList(request, response);
+            statusCode = String.valueOf(request.getAttribute("status"));
             if(!statusCode.equals("L0")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
             } else {
@@ -115,6 +118,7 @@ public class Editor extends HttpServlet {
             }
         } else if(action.equals("preview")){
             handleList(request, response);
+            statusCode = String.valueOf(request.getAttribute("status"));
             if(!statusCode.equals("p0")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
             } else {
@@ -122,11 +126,13 @@ public class Editor extends HttpServlet {
             }
         } else if(action.equals("save")){
             handleSave(request, response);
+            statusCode = String.valueOf(request.getAttribute("status"));
             if(!statusCode.equals("s0")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response);
                 return;
             } 
             handleList(request, response);
+            statusCode = String.valueOf(request.getAttribute("status"));
             if(!statusCode.equals("L0")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
             } else {
@@ -134,11 +140,13 @@ public class Editor extends HttpServlet {
             }
         } else if(action.equals("delete")){
             handleDelete(request, response);
+            statusCode = String.valueOf(request.getAttribute("status"));
             if(!statusCode.equals("d0")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response);
                 return;
             }
             handleList(request, response);
+            statusCode = String.valueOf(request.getAttribute("status"));
             if(!statusCode.equals("L0")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
             } else {
