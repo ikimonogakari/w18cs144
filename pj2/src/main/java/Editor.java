@@ -167,8 +167,8 @@ public class Editor extends HttpServlet {
     o3 stands for postid < 0, coresponding condition is "new post"
     */
     public void handleOpen(HttpServletRequest request, HttpServletResponse response){
-        String username = String.valueOf(request.getAttribute("username"));
-        String postid = String.valueOf(request.getAttribute("postid"));
+        String username = String.valueOf(request.getParameter("username"));
+        String postid = String.valueOf(request.getParameter("postid"));
         if(username == null || username.trim().length() == 0){
             request.setAttribute("status", "o1");
             return;
@@ -241,7 +241,7 @@ public class Editor extends HttpServlet {
     L2 stands for exception happening when getting data from database
     */
     public void handleList(HttpServletRequest request, HttpServletResponse response){
-        String username = String.valueOf(request.getAttribute("username"));
+        String username = String.valueOf(request.getParameter("username"));
         if(username == null || username.trim().length() == 0){
             request.setAttribute("status", "L1");
             return;
@@ -300,10 +300,10 @@ public class Editor extends HttpServlet {
     p2: postid missing
     */
     public void handlePreview(HttpServletRequest request, HttpServletResponse response){
-        String username = String.valueOf(request.getAttribute("username"));
-        String postid = String.valueOf(request.getAttribute("postid"));
-        String title = String.valueOf(request.getAttribute("title"));
-        String body = String.valueOf(request.getAttribute("body"));
+        String username = String.valueOf(request.getParameter("username"));
+        String postid = String.valueOf(request.getParameter("postid"));
+        String title = String.valueOf(request.getParameter("title"));
+        String body = String.valueOf(request.getParameter("body"));
         if(username == null || username.trim().length() == 0){
             request.setAttribute("status", "p1");
             return;
@@ -337,10 +337,10 @@ public class Editor extends HttpServlet {
     d3: exception happened when doing db operations
     */
     public void handleDelete(HttpServletRequest request, HttpServletResponse response){
-        String username = String.valueOf(request.getAttribute("username"));
-        String postid = String.valueOf(request.getAttribute("postid"));
-        String title = String.valueOf(request.getAttribute("title"));
-        String body = String.valueOf(request.getAttribute("body"));
+        String username = String.valueOf(request.getParameter("username"));
+        String postid = String.valueOf(request.getParameter("postid"));
+        String title = String.valueOf(request.getParameter("title"));
+        String body = String.valueOf(request.getParameter("body"));
         if(username == null || username.trim().length() == 0){
             request.setAttribute("status", "d1");
             return;
@@ -394,10 +394,10 @@ public class Editor extends HttpServlet {
     s3: exception happened when doing db operations
     */
     public void handleSave(HttpServletRequest request, HttpServletResponse response){
-        String username = String.valueOf(request.getAttribute("username"));
-        String postid = String.valueOf(request.getAttribute("postid"));
-        String title = String.valueOf(request.getAttribute("title"));
-        String body = String.valueOf(request.getAttribute("body"));
+        String username = String.valueOf(request.getParameter("username"));
+        String postid = String.valueOf(request.getParameter("postid"));
+        String title = String.valueOf(request.getParameter("title"));
+        String body = String.valueOf(request.getParameter("body"));
         if(username == null || username.trim().length() == 0){
             request.setAttribute("status", "s1");
             return;
