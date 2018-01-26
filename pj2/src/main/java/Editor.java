@@ -76,7 +76,7 @@ public class Editor extends HttpServlet {
                 request.getRequestDispatcher("/list.jsp").forward(request, response);
             }
         } else if(action.equals("preview")){
-            handleList(request, response);
+            handlePreview(request, response);
             statusCode = String.valueOf(request.getAttribute("status"));
             if(!statusCode.equals("p0")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
@@ -89,6 +89,7 @@ public class Editor extends HttpServlet {
         }
     }
     
+
     /**
      * Handles HTTP POST requests
      * 
@@ -117,7 +118,7 @@ public class Editor extends HttpServlet {
                 request.getRequestDispatcher("/list.jsp").forward(request, response);
             }
         } else if(action.equals("preview")){
-            handleList(request, response);
+            handlePreview(request, response);
             statusCode = String.valueOf(request.getAttribute("status"));
             if(!statusCode.equals("p0")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
@@ -158,13 +159,14 @@ public class Editor extends HttpServlet {
         }
     }
 
+
     /*
     Method to handle open request
     Invalid condition: 
-    o0 stands for successfully extracted from database
+    o0 stands for successfully extracted from database, or, postid <= 0, coresponding condition is "new post"
     o1 stands for username missing
     o2 stands for postid missing
-    o3 stands for postid < 0, coresponding condition is "new post"
+    o3 stands for database retrive exception
     */
     public void handleOpen(HttpServletRequest request, HttpServletResponse response){
         String username = String.valueOf(request.getParameter("username"));
@@ -178,14 +180,23 @@ public class Editor extends HttpServlet {
             return;
         }
 
-        if(Integer.parseInt(postid) < 0){
-            request.setAttribute("status", "o3");
+        if(Integer.parseInt(postid) <= 0){
+            request.setAttribute("status", "o0");
             if(!nextidMap.containsKey(username)){
                 nextidMap.put(username, 1);
             }
+            java.sql.Timestamp currStamp = getCurrTime();
             int nextid = nextidMap.get(username);
             nextidMap.put(username, nextid+1);
-            request.setAttribute("nextid", nextid);
+
+            Blog newBlog = new Blog();
+            newBlog.username = username;
+            newBlog.postid = nextid;
+            newBlog.title = "";
+            newBlog.body = "";
+            newBlog.created = String.valueOf(currStamp);
+            newBlog.modified = String.valueOf(currStamp);
+            request.setAttribute("blog", newBlog);
             return;
         }
 
@@ -211,22 +222,15 @@ public class Editor extends HttpServlet {
                 blog.username = rs.getString("username");
                 blog.postid = rs.getInt("postid");
                 blog.title = rs.getString("title");
-                blog.body = rs.getString("title");
+                blog.body = rs.getString("body");
                 blog.created = rs.getString("created");
                 blog.modified = rs.getString("modified");
             }
             request.setAttribute("status", "o0");
             request.setAttribute("blog", blog);
         } catch (SQLException ex){
-            System.out.println("SQLException caught");
-            System.out.println("---");
-            while ( ex != null ) {
-                System.out.println("Message   : " + ex.getMessage());
-                System.out.println("SQLState  : " + ex.getSQLState());
-                System.out.println("ErrorCode : " + ex.getErrorCode());
-                System.out.println("---");
-                ex = ex.getNextException();
-            }
+            request.setAttribute("status","o3");
+            SQLException_Handle(ex);
         } finally {
             try{conn.close();} catch (Exception e){}
             try{rs.close();} catch (Exception e){}
@@ -234,6 +238,8 @@ public class Editor extends HttpServlet {
         }
         return;
     }
+
+
     /*
     Function to handle list request
     L0 stands for successful get a list of blog from database
@@ -262,7 +268,7 @@ public class Editor extends HttpServlet {
             pst.setString(1, username);
             rs = pst.executeQuery();
             List<Blog> blogs = new ArrayList<>();
-            if(rs.next()){
+            while (rs.next()){
                 Blog blog = new Blog();
                 blog.username = rs.getString("username");
                 blog.postid = rs.getInt("postid");
@@ -276,15 +282,7 @@ public class Editor extends HttpServlet {
             request.setAttribute("status", "L0");
         } catch (SQLException ex){
             request.setAttribute("status", "L2");
-            System.out.println("SQLException caught");
-            System.out.println("---");
-            while ( ex != null ) {
-                System.out.println("Message   : " + ex.getMessage());
-                System.out.println("SQLState  : " + ex.getSQLState());
-                System.out.println("ErrorCode : " + ex.getErrorCode());
-                System.out.println("---");
-                ex = ex.getNextException();
-            }
+            SQLException_Handle(ex);
         } finally {
             try{conn.close();} catch (Exception e){}
             try{rs.close();} catch (Exception e){}
@@ -320,15 +318,10 @@ public class Editor extends HttpServlet {
         String body_html = renderer.render(bodyN);
         request.setAttribute("title_html", title_html);
         request.setAttribute("body_html", body_html);
-        Blog blog = new Blog();
-        blog.username = username;
-        blog.postid = Integer.parseInt(postid);
-        blog.title = title;
-        blog.body = body;
-        request.setAttribute("blog", blog);
         request.setAttribute("status", "p0");
         return;
     }
+
 
     /*
     d0: successfully executed
@@ -358,30 +351,20 @@ public class Editor extends HttpServlet {
             ex.printStackTrace();
         }
         Connection conn = null;
-        ResultSet rs = null;
         PreparedStatement pst = null;
         try{
             conn = DriverManager.getConnection(DATABASE_HOST, "cs144", "");
-            String sql = "DELETE * FROM Posts WHERE username = ? AND postid = ?";
+            String sql = "DELETE FROM Posts WHERE username = ? AND postid = ?";
             pst = conn.prepareStatement(sql);
             pst.setString(1, username);
             pst.setInt(2, Integer.parseInt(postid));
-            rs = pst.executeQuery();
+            int num = pst.executeUpdate();
             request.setAttribute("status", "d0");
         } catch (SQLException ex){
             request.setAttribute("status", "d3");
-            System.out.println("SQLException caught");
-            System.out.println("---");
-            while ( ex != null ) {
-                System.out.println("Message   : " + ex.getMessage());
-                System.out.println("SQLState  : " + ex.getSQLState());
-                System.out.println("ErrorCode : " + ex.getErrorCode());
-                System.out.println("---");
-                ex = ex.getNextException();
-            }
+            SQLException_Handle(ex);
         } finally {
             try{conn.close();} catch (Exception e){}
-            try{rs.close();} catch (Exception e){}
             try{pst.close();} catch (Exception e){}
         }
         return;
@@ -416,7 +399,6 @@ public class Editor extends HttpServlet {
             //  "Cannot find JDBC Driver."
         }
         Connection conn = null;
-        ResultSet rs = null;
         PreparedStatement pst = null;
         try{
             conn = DriverManager.getConnection(DATABASE_HOST, "cs144", "");
@@ -431,12 +413,10 @@ public class Editor extends HttpServlet {
                 nextidMap.put(username, postId+1);
                 newPost = true;
             }
-            Calendar cld = Calendar.getInstance();
-            java.util.Date now = cld.getTime();
-            java.sql.Timestamp currStamp = new java.sql.Timestamp(now.getTime());
+            java.sql.Timestamp currStamp = getCurrTime();
             String sql = null;
             if(newPost){
-                sql = "INSERT INTO Posts (username, postid, title, body, modified, created) VALUES (?, ?, ?, ?, ?,)";
+                sql = "INSERT INTO Posts (username, postid, title, body, modified, created) VALUES (?, ?, ?, ?, ?, ?)";
                 pst = conn.prepareStatement(sql);
                 pst.setString(1, username);
                 pst.setInt(2, postId);
@@ -453,24 +433,35 @@ public class Editor extends HttpServlet {
                 pst.setString(4, username);
                 pst.setInt(5, postId);
             }
-            rs = pst.executeQuery();
+            int num = pst.executeUpdate();
             request.setAttribute("status", "s0");
         } catch (SQLException ex){
             request.setAttribute("status", "s3");
-            System.out.println("SQLException caught");
-            System.out.println("---");
-            while ( ex != null ) {
-                System.out.println("Message   : " + ex.getMessage());
-                System.out.println("SQLState  : " + ex.getSQLState());
-                System.out.println("ErrorCode : " + ex.getErrorCode());
-                System.out.println("---");
-                ex = ex.getNextException();
-            }
+            SQLException_Handle(ex);
         } finally {
             try{conn.close();} catch (Exception e){}
-            try{rs.close();} catch (Exception e){}
             try{pst.close();} catch (Exception e){}
         }
         return;
+    }
+
+
+    private void SQLException_Handle (SQLException ex) {
+        System.out.println("SQLException caught");
+        System.out.println("---");
+        while ( ex != null ) {
+            System.out.println("Message   : " + ex.getMessage());
+            System.out.println("SQLState  : " + ex.getSQLState());
+            System.out.println("ErrorCode : " + ex.getErrorCode());
+            System.out.println("---");
+            ex = ex.getNextException();
+        }
+    }
+
+    private java.sql.Timestamp getCurrTime() {
+        Calendar cld = Calendar.getInstance();
+        java.util.Date now = cld.getTime();
+        java.sql.Timestamp currStamp = new java.sql.Timestamp(now.getTime());
+        return currStamp;
     }
 }

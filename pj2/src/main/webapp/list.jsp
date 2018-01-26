@@ -1,9 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page import="blog.Blog, java.util.*" %>
 <!DOCTYPE html>
-<%!
-String username_quot = request.getAttribute("username");
-username_quot = """ + username_quot + """;
+<%
+List<Blog> blogs = (List<Blog>) request.getAttribute("blogs");
 %>
 <html>
 <head>
@@ -13,10 +13,12 @@ username_quot = """ + username_quot + """;
 <body>
     <div>
         <form action="post"  id="0">
-            <input type="hidden" name="username" value=<%= username_quot %> >
-            <input type="hidden" name="postid" value=0>
+            <input type="hidden" name="username" value=<%= "\"" +request.getParameter("username")+ "\"" %> >
+            <input type="hidden" name="postid" value="0">
+            <button type="submit" name="action" value="open">New Post</button>
         </form>
     </div>
+    <p><%= blogs.size() %></p>
     <table>
         <tr>
             <th>Title</th>
@@ -25,22 +27,21 @@ username_quot = """ + username_quot + """;
             <th>&nbsp;</th>
         </tr>
         <%
-            Enumeration attrNames = request.getAttributeNames();
+            Iterator<Blog> iter = blogs.iterator(); 
             int count = 0;
-            while(attrNames.hasMoreElements()) {
+            while(iter.hasNext()) {
                 count++;
-                String attrKey = (String) attrNames.nextElement();
-                List<String> item = (List<String>) request.getAttribute(attrKey);
+                Blog t_blog = iter.next();
                 out.print("<tr>\n");
-                out.print("<form id=" + count + " action=\"post\" method=\"POST\">\n")
-                out.print("<input type=\"hidden\" name=\"username\" value="+username_quot+">\n"); 
-                out.print("<input type=\"hidden\" name=\"postid\" value="+item.get(0)+">\n"); // postid 
-                out.print("<td>"+item.get(1)+"</td>\n"); //title
-                out.print("<td>"+item.get(2)+"</td>\n"); //create
-                out.print("<td>"+item.get(3)+"</td>\n"); //modify
+                out.print("<form id=" + count + " action=\"post\" method=\"POST\">\n");
+                out.print("<input type=\"hidden\" name=\"username\" value=\"" + request.getParameter("username") + "\">\n"); 
+                out.print("<input type=\"hidden\" name=\"postid\" value=\"" + t_blog.postid + "\">\n"); // postid 
+                out.print("<td>"+ t_blog.title  + "</td>\n"); //title
+                out.print("<td>"+ t_blog.created +"</td>\n"); //create
+                out.print("<td>"+ t_blog.modified +"</td>\n"); //modify
                 out.print("<td>\n");
-                out.print("<button type="submit" name="action" value="open">Open</button>\n");
-                out.print("<button type="submit" name="action" value="delete">Delete</button>\n");
+                out.print("<button type=\"submit\" name=\"action\" value=\"open\">Open</button>\n");
+                out.print("<button type=\"submit\" name=\"action\" value=\"delete\">Delete</button>\n");
                 out.print("</td>\n");
                 out.print("</form>\n");
                 out.print("</tr>\n");

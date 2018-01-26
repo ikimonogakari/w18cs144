@@ -9,6 +9,3 @@ list.jsp
   delete in list page => list.jsp
 
 need a page named error.jsp, show error message according to the status code.
-
-
-
