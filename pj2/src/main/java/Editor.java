@@ -57,7 +57,7 @@ public class Editor extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException 
     {
-        String action = String.valueOf(request.getAttribute("action"));
+        String action = String.valueOf(request.getParameter("action"));
         String statusCode = "";
         if(action.equals("open")){
             handleOpen(request, response);
@@ -98,7 +98,7 @@ public class Editor extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException 
     {
-        String action = String.valueOf(request.getAttribute("action"));
+        String action = String.valueOf(request.getParameter("action"));
         String statusCode = "";
         if(action.equals("open")){
             handleOpen(request, response);
@@ -250,6 +250,7 @@ public class Editor extends HttpServlet {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
         } catch (Exception ex){
             ex.printStackTrace();
+            System.out.println("cannot connect to jdbc");
         }
         Connection conn = null;
         ResultSet rs = null;
