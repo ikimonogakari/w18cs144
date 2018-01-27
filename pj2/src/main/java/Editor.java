@@ -3,9 +3,7 @@ import blog.*;
 import java.io.IOException;
 import java.sql.* ;
 import java.util.*;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.regex.*;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -169,13 +167,23 @@ public class Editor extends HttpServlet {
     o3 stands for database retrive exception
     */
     public void handleOpen(HttpServletRequest request, HttpServletResponse response){
-        String username = String.valueOf(request.getParameter("username"));
+        Object usrnme = request.getParameter("username");
+        if(username == null){
+            request.setAttribute("status", "s1");
+            return;
+        }
+        String username = String.valueOf(usrnme);
         String postid = String.valueOf(request.getParameter("postid"));
         if(username == null || username.trim().length() == 0){
             request.setAttribute("status", "o1");
             return;
         }
         if(postid == null || postid.trim().length() == 0){
+            request.setAttribute("status", "o2");
+            return;
+        }
+        boolean matches = Pattern.matches("-?[0-9]+", postid);
+        if(!matches){
             request.setAttribute("status", "o2");
             return;
         }
@@ -226,6 +234,21 @@ public class Editor extends HttpServlet {
                 blog.created = rs.getString("created");
                 blog.modified = rs.getString("modified");
             }
+            if(blog == null){
+                if(!nextidMap.containsKey(username)){
+                    nextidMap.put(username, 1);
+                }
+                java.sql.Timestamp currStamp = getCurrTime();
+                int nextid = nextidMap.get(username);
+                nextidMap.put(username, nextid+1);
+                blog = new Blog();
+                blog.username = username;
+                blog.postid = nextid;
+                blog.title = "";
+                blog.body = "";
+                blog.created = String.valueOf(currStamp);
+                blog.modified = String.valueOf(currStamp);
+            }
             request.setAttribute("status", "o0");
             request.setAttribute("blog", blog);
         } catch (SQLException ex){
@@ -247,7 +270,12 @@ public class Editor extends HttpServlet {
     L2 stands for exception happening when getting data from database
     */
     public void handleList(HttpServletRequest request, HttpServletResponse response){
-        String username = String.valueOf(request.getParameter("username"));
+        Object usrnme = request.getParameter("username");
+        if(username == null){
+            request.setAttribute("status", "s1");
+            return;
+        }
+        String username = String.valueOf(usrnme);
         if(username == null || username.trim().length() == 0){
             request.setAttribute("status", "L1");
             return;
@@ -298,7 +326,12 @@ public class Editor extends HttpServlet {
     p2: postid missing
     */
     public void handlePreview(HttpServletRequest request, HttpServletResponse response){
-        String username = String.valueOf(request.getParameter("username"));
+        Object usrnme = request.getParameter("username");
+        if(username == null){
+            request.setAttribute("status", "s1");
+            return;
+        }
+        String username = String.valueOf(usrnme);
         String postid = String.valueOf(request.getParameter("postid"));
         String title = String.valueOf(request.getParameter("title"));
         String body = String.valueOf(request.getParameter("body"));
@@ -307,6 +340,11 @@ public class Editor extends HttpServlet {
             return;
         }
         if(postid == null || postid.trim().length() == 0){
+            request.setAttribute("status", "p2");
+            return;
+        }
+        boolean matches = Pattern.matches("-?[0-9]+", postid);
+        if(!matches){
             request.setAttribute("status", "p2");
             return;
         }
@@ -330,7 +368,12 @@ public class Editor extends HttpServlet {
     d3: exception happened when doing db operations
     */
     public void handleDelete(HttpServletRequest request, HttpServletResponse response){
-        String username = String.valueOf(request.getParameter("username"));
+        Object usrnme = request.getParameter("username");
+        if(username == null){
+            request.setAttribute("status", "s1");
+            return;
+        }
+        String username = String.valueOf(usrnme);
         String postid = String.valueOf(request.getParameter("postid"));
         String title = String.valueOf(request.getParameter("title"));
         String body = String.valueOf(request.getParameter("body"));
@@ -343,7 +386,11 @@ public class Editor extends HttpServlet {
             return;
         }
         // Condition when postid < 0
-        
+        boolean matches = Pattern.matches("-?[0-9]+", postid);
+        if(!matches){
+            request.setAttribute("status", "d2");
+            return;
+        }
         // valid request
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -372,12 +419,17 @@ public class Editor extends HttpServlet {
 
     /*
     s0: successfully executed
-    s1: username missing
+    s1: username invalid or missing
     s2: postid missing
     s3: exception happened when doing db operations
     */
     public void handleSave(HttpServletRequest request, HttpServletResponse response){
-        String username = String.valueOf(request.getParameter("username"));
+        Object usrnme = request.getParameter("username");
+        if(username == null){
+            request.setAttribute("status", "s1");
+            return;
+        }
+        String username = String.valueOf(usrnme);
         String postid = String.valueOf(request.getParameter("postid"));
         String title = String.valueOf(request.getParameter("title"));
         String body = String.valueOf(request.getParameter("body"));
@@ -390,7 +442,11 @@ public class Editor extends HttpServlet {
             return;
         }
         // invalid postid
-
+        boolean matches = Pattern.matches("-?[0-9]+", postid);
+        if(!matches){
+            request.setAttribute("status", "s2");
+            return;
+        }
         // valid request
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -408,9 +464,7 @@ public class Editor extends HttpServlet {
                 nextidMap.put(username, 1);
             }
 
-            if(postId > nextidMap.get(username) || postId <= 0){
-                postId = nextidMap.get(username);
-                nextidMap.put(username, postId+1);
+            if(postId + 1 == nextidMap.get(username)){
                 newPost = true;
             }
             java.sql.Timestamp currStamp = getCurrTime();
