@@ -39,6 +39,31 @@ public class Editor extends HttpServlet {
     {
         /*  write any servlet initialization code here or remove this function */
         nextidMap = new HashMap<>();
+        try{
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+        } catch (Exception ex){
+            ex.printStackTrace();
+        }
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement pst = null;
+        try{
+            conn = DriverManager.getConnection(DATABASE_HOST, "cs144", "");
+            String sql = "SELECT username, max(postid) AS postid FROM Posts GROUP BY username";
+            pst = conn.prepareStatement(sql);
+            rs = pst.executeQuery();
+            while(rs.next()){
+                String username = rs.getString("username");
+                int postid = rs.getInt("postid");
+                nextidMap.put(username, postid);
+            }
+        } catch (SQLException ex){
+            SQLException_Handle(ex);
+        } finally {
+            try{conn.close();} catch (Exception e){}
+            try{rs.close();} catch (Exception e){}
+            try{pst.close();} catch (Exception e){}
+        }
     }
     
     public void destroy()
@@ -60,7 +85,7 @@ public class Editor extends HttpServlet {
         if(action.equals("open")){
             handleOpen(request, response);
             statusCode = String.valueOf(request.getAttribute("status"));
-            if(!statusCode.equals("o0")){
+            if(!statusCode.equals("pass")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
             } else {
                 request.getRequestDispatcher("/edit.jsp").forward(request, response);
@@ -68,7 +93,7 @@ public class Editor extends HttpServlet {
         } else if(action.equals("list")){
             handleList(request, response);
             statusCode = String.valueOf(request.getAttribute("status"));
-            if(!statusCode.equals("L0")){
+            if(!statusCode.equals("pass")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
             } else {
                 request.getRequestDispatcher("/list.jsp").forward(request, response);
@@ -76,7 +101,7 @@ public class Editor extends HttpServlet {
         } else if(action.equals("preview")){
             handlePreview(request, response);
             statusCode = String.valueOf(request.getAttribute("status"));
-            if(!statusCode.equals("p0")){
+            if(!statusCode.equals("pass")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
             } else {
                 request.getRequestDispatcher("/preview.jsp").forward(request, response);
@@ -102,7 +127,7 @@ public class Editor extends HttpServlet {
         if(action.equals("open")){
             handleOpen(request, response);
             statusCode = String.valueOf(request.getAttribute("status"));
-            if(!statusCode.equals("o0")){
+            if(!statusCode.equals("pass")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
             } else {
                 request.getRequestDispatcher("/edit.jsp").forward(request, response);
@@ -110,7 +135,7 @@ public class Editor extends HttpServlet {
         } else if(action.equals("list")){
             handleList(request, response);
             statusCode = String.valueOf(request.getAttribute("status"));
-            if(!statusCode.equals("L0")){
+            if(!statusCode.equals("pass")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
             } else {
                 request.getRequestDispatcher("/list.jsp").forward(request, response);
@@ -118,7 +143,7 @@ public class Editor extends HttpServlet {
         } else if(action.equals("preview")){
             handlePreview(request, response);
             statusCode = String.valueOf(request.getAttribute("status"));
-            if(!statusCode.equals("p0")){
+            if(!statusCode.equals("pass")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
             } else {
                 request.getRequestDispatcher("/preview.jsp").forward(request, response);
@@ -126,13 +151,13 @@ public class Editor extends HttpServlet {
         } else if(action.equals("save")){
             handleSave(request, response);
             statusCode = String.valueOf(request.getAttribute("status"));
-            if(!statusCode.equals("s0")){
+            if(!statusCode.equals("pass")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response);
                 return;
             } 
             handleList(request, response);
             statusCode = String.valueOf(request.getAttribute("status"));
-            if(!statusCode.equals("L0")){
+            if(!statusCode.equals("pass")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
             } else {
                 request.getRequestDispatcher("/list.jsp").forward(request, response);
@@ -140,13 +165,13 @@ public class Editor extends HttpServlet {
         } else if(action.equals("delete")){
             handleDelete(request, response);
             statusCode = String.valueOf(request.getAttribute("status"));
-            if(!statusCode.equals("d0")){
+            if(!statusCode.equals("pass")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response);
                 return;
             }
             handleList(request, response);
             statusCode = String.valueOf(request.getAttribute("status"));
-            if(!statusCode.equals("L0")){
+            if(!statusCode.equals("pass")){
                 request.getRequestDispatcher("/error.jsp").forward(request, response); 
             } else {
                 request.getRequestDispatcher("/list.jsp").forward(request, response);
@@ -158,133 +183,17 @@ public class Editor extends HttpServlet {
     }
 
 
-    /*
-    Method to handle open request
-    Invalid condition: 
-    o0 stands for successfully extracted from database, or, postid <= 0, coresponding condition is "new post"
-    o1 stands for username missing
-    o2 stands for postid missing
-    o3 stands for database retrive exception
-    */
-    public void handleOpen(HttpServletRequest request, HttpServletResponse response){
-        Object usrnme = request.getParameter("username");
-        if(username == null){
-            request.setAttribute("status", "s1");
-            return;
-        }
-        String username = String.valueOf(usrnme);
-        String postid = String.valueOf(request.getParameter("postid"));
-        if(username == null || username.trim().length() == 0){
-            request.setAttribute("status", "o1");
-            return;
-        }
-        if(postid == null || postid.trim().length() == 0){
-            request.setAttribute("status", "o2");
-            return;
-        }
-        boolean matches = Pattern.matches("-?[0-9]+", postid);
-        if(!matches){
-            request.setAttribute("status", "o2");
-            return;
-        }
-
-        if(Integer.parseInt(postid) <= 0){
-            request.setAttribute("status", "o0");
-            if(!nextidMap.containsKey(username)){
-                nextidMap.put(username, 1);
-            }
-            java.sql.Timestamp currStamp = getCurrTime();
-            int nextid = nextidMap.get(username);
-            nextidMap.put(username, nextid+1);
-
-            Blog newBlog = new Blog();
-            newBlog.username = username;
-            newBlog.postid = nextid;
-            newBlog.title = "";
-            newBlog.body = "";
-            newBlog.created = String.valueOf(currStamp);
-            newBlog.modified = String.valueOf(currStamp);
-            request.setAttribute("blog", newBlog);
-            return;
-        }
-
-        try{
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-        } catch (Exception ex){
-            ex.printStackTrace();
-            //  "Cannot find JDBC Driver."
-        }
-        Connection conn = null;
-        ResultSet rs = null;
-        PreparedStatement pst = null;
-        try{
-            conn = DriverManager.getConnection(DATABASE_HOST, "cs144", "");
-            String sql = "SELECT * FROM Posts WHERE username = ? AND postid = ?";
-            pst = conn.prepareStatement(sql);
-            pst.setString(1, username);
-            pst.setInt(2, Integer.parseInt(postid));
-            rs = pst.executeQuery();
-            Blog blog = null;
-            if(rs.next()){
-                blog = new Blog();
-                blog.username = rs.getString("username");
-                blog.postid = rs.getInt("postid");
-                blog.title = rs.getString("title");
-                blog.body = rs.getString("body");
-                blog.created = rs.getString("created");
-                blog.modified = rs.getString("modified");
-            }
-            if(blog == null){
-                if(!nextidMap.containsKey(username)){
-                    nextidMap.put(username, 1);
-                }
-                java.sql.Timestamp currStamp = getCurrTime();
-                int nextid = nextidMap.get(username);
-                nextidMap.put(username, nextid+1);
-                blog = new Blog();
-                blog.username = username;
-                blog.postid = nextid;
-                blog.title = "";
-                blog.body = "";
-                blog.created = String.valueOf(currStamp);
-                blog.modified = String.valueOf(currStamp);
-            }
-            request.setAttribute("status", "o0");
-            request.setAttribute("blog", blog);
-        } catch (SQLException ex){
-            request.setAttribute("status","o3");
-            SQLException_Handle(ex);
-        } finally {
-            try{conn.close();} catch (Exception e){}
-            try{rs.close();} catch (Exception e){}
-            try{pst.close();} catch (Exception e){}
-        }
-        return;
-    }
-
-
-    /*
-    Function to handle list request
-    L0 stands for successful get a list of blog from database
-    L1 stands for username missing
-    L2 stands for exception happening when getting data from database
-    */
     public void handleList(HttpServletRequest request, HttpServletResponse response){
-        Object usrnme = request.getParameter("username");
-        if(username == null){
-            request.setAttribute("status", "s1");
+        String[] parameters = new String[1];
+        if (!validUsernamePostid(request, parameters)) {
             return;
         }
-        String username = String.valueOf(usrnme);
-        if(username == null || username.trim().length() == 0){
-            request.setAttribute("status", "L1");
-            return;
-        }
+        String username = parameters[0];
+
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
         } catch (Exception ex){
             ex.printStackTrace();
-            System.out.println("cannot connect to jdbc");
         }
         Connection conn = null;
         ResultSet rs = null;
@@ -306,10 +215,12 @@ public class Editor extends HttpServlet {
                 blog.modified = rs.getString("modified");
                 blogs.add(blog);
             }
+            Collections.sort(blogs);
+            nextidMap.put(username, blogs.get(blogs.size()-1).postid);
             request.setAttribute("blogs", blogs);
-            request.setAttribute("status", "L0");
+            request.setAttribute("status", "pass");
         } catch (SQLException ex){
-            request.setAttribute("status", "L2");
+            request.setAttribute("status", "SQL execution Error!");
             SQLException_Handle(ex);
         } finally {
             try{conn.close();} catch (Exception e){}
@@ -320,34 +231,104 @@ public class Editor extends HttpServlet {
     }
 
 
-    /*
-    p0: correct parsed all the parameters; 
-    p1: username missing; 
-    p2: postid missing
-    */
+    public void handleOpen(HttpServletRequest request, HttpServletResponse response){
+        String[] parameters = new String[2];
+        if (!validUsernamePostid(request, parameters)) {
+            return;
+        }
+        String username = parameters[0];
+        String postid = parameters[1];
+        String title = request.getParameter("title");
+        String body = request.getParameter("body");
+
+        try{
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+        } catch (Exception ex){
+            ex.printStackTrace();
+        }
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement pst = null;
+        try{
+            conn = DriverManager.getConnection(DATABASE_HOST, "cs144", "");
+            String sql = "SELECT * FROM Posts WHERE username = ? AND postid = ?";
+            pst = conn.prepareStatement(sql);
+            pst.setString(1, username);
+            pst.setInt(2, Integer.parseInt(postid));
+            rs = pst.executeQuery();
+            Blog blog = new Blog();
+            if(rs.next()){
+                blog.username = rs.getString("username");
+                blog.postid = rs.getInt("postid");
+                blog.title = title == null ? rs.getString("title") : title;
+                blog.body = body == null ? rs.getString("body") : body;
+                blog.created = rs.getString("created");
+                blog.modified = rs.getString("modified");
+            } else {
+                java.sql.Timestamp currStamp = getCurrTime();
+                blog.username = username;
+                blog.postid = Integer.parseInt(postid);
+                blog.title = title == null ? "" : title;
+                blog.body = body == null ? "" : body;
+                blog.created = String.valueOf(currStamp);
+                blog.modified = String.valueOf(currStamp);
+            }
+            request.setAttribute("blog", blog);
+            request.setAttribute("status", "pass");
+        } catch (SQLException ex){
+            request.setAttribute("status", "SQL execution Error!");
+            SQLException_Handle(ex);
+        } finally {
+            try{conn.close();} catch (Exception e){}
+            try{rs.close();} catch (Exception e){}
+            try{pst.close();} catch (Exception e){}
+        }
+        return;
+    }
+
+
     public void handlePreview(HttpServletRequest request, HttpServletResponse response){
-        Object usrnme = request.getParameter("username");
-        if(username == null){
-            request.setAttribute("status", "s1");
+        String[] parameters = new String[2];
+        if (!validUsernamePostid(request, parameters)) {
             return;
         }
-        String username = String.valueOf(usrnme);
-        String postid = String.valueOf(request.getParameter("postid"));
-        String title = String.valueOf(request.getParameter("title"));
-        String body = String.valueOf(request.getParameter("body"));
-        if(username == null || username.trim().length() == 0){
-            request.setAttribute("status", "p1");
-            return;
+        String username = parameters[0];
+        String postid = parameters[1];
+        String title = request.getParameter("title");
+        String body = request.getParameter("body");
+        if(title == null || body == null){
+            try{
+                Class.forName("com.mysql.jdbc.Driver").newInstance();
+            } catch (Exception ex){
+                ex.printStackTrace();
+            }
+            Connection conn = null;
+            ResultSet rs = null;
+            PreparedStatement pst = null;
+            try{
+                conn = DriverManager.getConnection(DATABASE_HOST, "cs144", "");
+                String sql = "SELECT * FROM Posts WHERE username = ? AND postid = ?";
+                pst = conn.prepareStatement(sql);
+                pst.setString(1, username);
+                pst.setInt(2, Integer.parseInt(postid));
+                rs = pst.executeQuery();
+                if(rs.next()){
+                    title = title == null ? rs.getString("title") : title;
+                    body = body == null ? rs.getString("body") : body;
+                } else {
+                    title = title == null ? "" : title;
+                    body = body == null ? "" : body;
+                }
+            } catch (SQLException ex){
+                request.setAttribute("status", "SQL execution Error!");
+                SQLException_Handle(ex);
+            } finally {
+                try{conn.close();} catch (Exception e){}
+                try{rs.close();} catch (Exception e){}
+                try{pst.close();} catch (Exception e){}
+            }
         }
-        if(postid == null || postid.trim().length() == 0){
-            request.setAttribute("status", "p2");
-            return;
-        }
-        boolean matches = Pattern.matches("-?[0-9]+", postid);
-        if(!matches){
-            request.setAttribute("status", "p2");
-            return;
-        }
+        // valid request
         Parser parser = Parser.builder().build();
         Node titleN = parser.parse(title);
         Node bodyN = parser.parse(body);
@@ -356,40 +337,87 @@ public class Editor extends HttpServlet {
         String body_html = renderer.render(bodyN);
         request.setAttribute("title_html", title_html);
         request.setAttribute("body_html", body_html);
-        request.setAttribute("status", "p0");
+        request.setAttribute("status", "pass");
         return;
     }
 
 
-    /*
-    d0: successfully executed
-    d1: username missing
-    d2: postid missing
-    d3: exception happened when doing db operations
-    */
+    public void handleSave(HttpServletRequest request, HttpServletResponse response){
+        String[] parameters = new String[2];
+        if (!validUsernamePostid(request, parameters)) {
+            return;
+        }
+        String username = parameters[0];
+        String postid = parameters[1];
+        String title = request.getParameter("title");
+        String body = request.getParameter("body");
+        if(title == null){
+            title = "";
+        }
+        if(body == null){
+            body = "";
+        }
+        // valid request
+        try{
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+        } catch (Exception ex){
+            ex.printStackTrace();
+        }
+        Connection conn = null;
+        PreparedStatement pst = null;
+        try{
+            conn = DriverManager.getConnection(DATABASE_HOST, "cs144", "");
+            int postId = Integer.parseInt(postid);
+            java.sql.Timestamp currStamp = getCurrTime();
+            String sql = "UPDATE Posts SET title = (?), body = (?), modified = (?) WHERE username = ? AND postid = ?";
+            pst = conn.prepareStatement(sql);
+            pst.setString(1, title);
+            pst.setString(2, body);
+            pst.setTimestamp(3, currStamp);
+            pst.setString(4, username);
+            pst.setInt(5, postId);
+            int num = pst.executeUpdate();
+            // System.out.println("--- "+num);
+            if (num == 0) {
+                postId = updateNextid(username, -postId);
+                sql = "INSERT INTO Posts (username, postid, title, body, modified, created) VALUES (?, ?, ?, ?, ?, ?)";
+                pst = conn.prepareStatement(sql);
+                pst.setString(1, username);
+                pst.setInt(2, postId);
+                pst.setString(3, title);
+                pst.setString(4, body);
+                pst.setTimestamp(5, currStamp);
+                pst.setTimestamp(6, currStamp);
+                pst.executeUpdate();
+            } else {
+                updateNextid(username, postId);
+            }
+            request.setAttribute("status", "pass");
+        } catch (SQLException ex){
+            request.setAttribute("status", "SQL execution Error!");
+            SQLException_Handle(ex);
+        } finally {
+            try{conn.close();} catch (Exception e){}
+            try{pst.close();} catch (Exception e){}
+        }
+        return;
+    }
+
+
     public void handleDelete(HttpServletRequest request, HttpServletResponse response){
-        Object usrnme = request.getParameter("username");
-        if(username == null){
-            request.setAttribute("status", "s1");
+        String[] parameters = new String[2];
+        if (!validUsernamePostid(request, parameters)) {
             return;
         }
-        String username = String.valueOf(usrnme);
-        String postid = String.valueOf(request.getParameter("postid"));
-        String title = String.valueOf(request.getParameter("title"));
-        String body = String.valueOf(request.getParameter("body"));
-        if(username == null || username.trim().length() == 0){
-            request.setAttribute("status", "d1");
-            return;
+        String username = parameters[0];
+        String postid = parameters[1];
+        String title = request.getParameter("title");
+        String body = request.getParameter("body");
+        if(title == null){
+            title = "";
         }
-        if(postid == null || postid.trim().length() == 0){
-            request.setAttribute("status", "d2");
-            return;
-        }
-        // Condition when postid < 0
-        boolean matches = Pattern.matches("-?[0-9]+", postid);
-        if(!matches){
-            request.setAttribute("status", "d2");
-            return;
+        if(body == null){
+            body = "";
         }
         // valid request
         try{
@@ -406,9 +434,9 @@ public class Editor extends HttpServlet {
             pst.setString(1, username);
             pst.setInt(2, Integer.parseInt(postid));
             int num = pst.executeUpdate();
-            request.setAttribute("status", "d0");
+            request.setAttribute("status", "pass");
         } catch (SQLException ex){
-            request.setAttribute("status", "d3");
+            request.setAttribute("status", "SQL execution Error!");
             SQLException_Handle(ex);
         } finally {
             try{conn.close();} catch (Exception e){}
@@ -417,88 +445,89 @@ public class Editor extends HttpServlet {
         return;
     }
 
-    /*
-    s0: successfully executed
-    s1: username invalid or missing
-    s2: postid missing
-    s3: exception happened when doing db operations
-    */
-    public void handleSave(HttpServletRequest request, HttpServletResponse response){
-        Object usrnme = request.getParameter("username");
-        if(username == null){
-            request.setAttribute("status", "s1");
-            return;
-        }
-        String username = String.valueOf(usrnme);
-        String postid = String.valueOf(request.getParameter("postid"));
-        String title = String.valueOf(request.getParameter("title"));
-        String body = String.valueOf(request.getParameter("body"));
-        if(username == null || username.trim().length() == 0){
-            request.setAttribute("status", "s1");
-            return;
-        }
-        if(postid == null || postid.trim().length() == 0){
-            request.setAttribute("status", "s2");
-            return;
-        }
-        // invalid postid
-        boolean matches = Pattern.matches("-?[0-9]+", postid);
-        if(!matches){
-            request.setAttribute("status", "s2");
-            return;
-        }
-        // valid request
+    private Blog retrivePost (String username, String postid) {
+        Blog res = null;
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
         } catch (Exception ex){
             ex.printStackTrace();
-            //  "Cannot find JDBC Driver."
         }
         Connection conn = null;
+        ResultSet rs = null;
         PreparedStatement pst = null;
         try{
             conn = DriverManager.getConnection(DATABASE_HOST, "cs144", "");
-            int postId = Integer.parseInt(postid);
-            boolean newPost = false;
-            if(!nextidMap.containsKey(username)){
-                nextidMap.put(username, 1);
+            String sql = "SELECT * FROM Posts WHERE username = ? AND postid = ?";
+            pst = conn.prepareStatement(sql);
+            pst.setString(1, username);
+            pst.setInt(2, Integer.parseInt(postid));
+            rs = pst.executeQuery();
+            if(rs.next()){
+                res = new Blog();
+                blog.username = rs.getString("username");
+                blog.postid = rs.getInt("postid");
+                blog.title = title == null ? rs.getString("title") : title;
+                blog.body = body == null ? rs.getString("body") : body;
+                blog.created = rs.getString("created");
+                blog.modified = rs.getString("modified");
             }
-
-            if(postId + 1 == nextidMap.get(username)){
-                newPost = true;
-            }
-            java.sql.Timestamp currStamp = getCurrTime();
-            String sql = null;
-            if(newPost){
-                sql = "INSERT INTO Posts (username, postid, title, body, modified, created) VALUES (?, ?, ?, ?, ?, ?)";
-                pst = conn.prepareStatement(sql);
-                pst.setString(1, username);
-                pst.setInt(2, postId);
-                pst.setString(3, title);
-                pst.setString(4, body);
-                pst.setTimestamp(5, currStamp);
-                pst.setTimestamp(6, currStamp);
-            } else {
-                sql = "UPDATE Posts SET title = (?), body = (?), modified = (?) WHERE username = ? AND postid = ?";
-                pst = conn.prepareStatement(sql);
-                pst.setString(1, title);
-                pst.setString(2, body);
-                pst.setTimestamp(3, currStamp);
-                pst.setString(4, username);
-                pst.setInt(5, postId);
-            }
-            int num = pst.executeUpdate();
-            request.setAttribute("status", "s0");
         } catch (SQLException ex){
-            request.setAttribute("status", "s3");
+            request.setAttribute("status", "SQL execution Error!");
             SQLException_Handle(ex);
         } finally {
             try{conn.close();} catch (Exception e){}
+            try{rs.close();} catch (Exception e){}
             try{pst.close();} catch (Exception e){}
         }
-        return;
+        return res;
     }
 
+    private int updateNextid (String username, int postid) {
+        if(!nextidMap.containsKey(username)){
+            nextidMap.put(username, 1);
+            return 1;
+        } else if (postid >0) {                     // if get a id can be find in db
+            int curMax = nextidMap.get(username);
+            if (postid > curMax) {
+                postid = curMax+1;
+                nextidMap.put(username, postid);
+            }
+            return postid;
+        } else {                                    // if get a id does not exist in db, use max
+            int curMax = nextidMap.get(username);
+            postid = curMax+1;
+            nextidMap.put(username, postid);
+            return postid;
+        }
+    }
+
+    private boolean validUsernamePostid (HttpServletRequest request, String[] parameters) {
+        // username is null
+        String username = request.getParameter("username");
+        if (username == null || username.trim().length() == 0) {
+            request.setAttribute("status", "err: username invalid!");
+            return false;
+        }
+        parameters[0] = username;
+        
+        if (parameters.length > 1) {
+            String postid = request.getParameter("postid");
+            if(postid == null || postid.trim().length() == 0){
+                request.setAttribute("status", "err: postid invalid!");
+                return false;
+            }
+            if (!Pattern.matches("-?[0-9]+", postid)) {
+                request.setAttribute("status", "err: postid can only be numbers!");
+                return false;
+            }
+            int num = Integer.parseInt(postid);
+            if (num < 0) {
+                return false;
+            }
+            parameters[1] = postid;
+        }
+        return true;
+    }
 
     private void SQLException_Handle (SQLException ex) {
         System.out.println("SQLException caught");

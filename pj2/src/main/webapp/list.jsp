@@ -19,6 +19,7 @@ List<Blog> blogs = (List<Blog>) request.getAttribute("blogs");
         </form>
     </div>
     <p><%= blogs.size() %></p>
+    <p><%= request.getParameter("username") %><p>
     <table>
         <tr>
             <th>Title</th>
