@@ -216,7 +216,9 @@ public class Editor extends HttpServlet {
                 blogs.add(blog);
             }
             Collections.sort(blogs);
-            nextidMap.put(username, blogs.get(blogs.size()-1).postid);
+            if (blogs.size() > 0) {
+                nextidMap.put(username, blogs.get(blogs.size()-1).postid);
+            }
             request.setAttribute("blogs", blogs);
             request.setAttribute("status", "pass");
         } catch (SQLException ex){
