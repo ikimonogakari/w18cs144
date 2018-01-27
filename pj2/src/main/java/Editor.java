@@ -241,48 +241,32 @@ public class Editor extends HttpServlet {
         String title = request.getParameter("title");
         String body = request.getParameter("body");
 
-        try{
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-        } catch (Exception ex){
-            ex.printStackTrace();
-        }
-        Connection conn = null;
-        ResultSet rs = null;
-        PreparedStatement pst = null;
-        try{
-            conn = DriverManager.getConnection(DATABASE_HOST, "cs144", "");
-            String sql = "SELECT * FROM Posts WHERE username = ? AND postid = ?";
-            pst = conn.prepareStatement(sql);
-            pst.setString(1, username);
-            pst.setInt(2, Integer.parseInt(postid));
-            rs = pst.executeQuery();
-            Blog blog = new Blog();
-            if(rs.next()){
-                blog.username = rs.getString("username");
-                blog.postid = rs.getInt("postid");
-                blog.title = title == null ? rs.getString("title") : title;
-                blog.body = body == null ? rs.getString("body") : body;
-                blog.created = rs.getString("created");
-                blog.modified = rs.getString("modified");
-            } else {
-                java.sql.Timestamp currStamp = getCurrTime();
-                blog.username = username;
-                blog.postid = Integer.parseInt(postid);
-                blog.title = title == null ? "" : title;
-                blog.body = body == null ? "" : body;
-                blog.created = String.valueOf(currStamp);
-                blog.modified = String.valueOf(currStamp);
-            }
-            request.setAttribute("blog", blog);
-            request.setAttribute("status", "pass");
-        } catch (SQLException ex){
+        Blog[] a_blog = new Blog[1];
+        if (!retrivePost(username, postid, a_blog, request)) {
             request.setAttribute("status", "SQL execution Error!");
-            SQLException_Handle(ex);
-        } finally {
-            try{conn.close();} catch (Exception e){}
-            try{rs.close();} catch (Exception e){}
-            try{pst.close();} catch (Exception e){}
+            return;
         }
+        Blog blog = a_blog[0];
+        if (blog == null) {
+            blog = new Blog();
+            java.sql.Timestamp currStamp = getCurrTime();
+            blog.username = username;
+            blog.postid = Integer.parseInt(postid);
+            blog.title = "";
+            blog.body = "";
+            blog.created = String.valueOf(currStamp);
+            blog.modified = String.valueOf(currStamp);
+        }
+        
+        if (title != null) {
+            blog.title = title;
+        }
+        if (body != null) {
+            blog.body = body;
+        }
+
+        request.setAttribute("blog", blog);
+        request.setAttribute("status", "pass");
         return;
     }
 
@@ -297,37 +281,32 @@ public class Editor extends HttpServlet {
         String title = request.getParameter("title");
         String body = request.getParameter("body");
         if(title == null || body == null){
-            try{
-                Class.forName("com.mysql.jdbc.Driver").newInstance();
-            } catch (Exception ex){
-                ex.printStackTrace();
-            }
-            Connection conn = null;
-            ResultSet rs = null;
-            PreparedStatement pst = null;
-            try{
-                conn = DriverManager.getConnection(DATABASE_HOST, "cs144", "");
-                String sql = "SELECT * FROM Posts WHERE username = ? AND postid = ?";
-                pst = conn.prepareStatement(sql);
-                pst.setString(1, username);
-                pst.setInt(2, Integer.parseInt(postid));
-                rs = pst.executeQuery();
-                if(rs.next()){
-                    title = title == null ? rs.getString("title") : title;
-                    body = body == null ? rs.getString("body") : body;
-                } else {
-                    title = title == null ? "" : title;
-                    body = body == null ? "" : body;
-                }
-            } catch (SQLException ex){
+            request.setAttribute("get","no title or body");
+            Blog[] a_blog = new Blog[1];
+            if (!retrivePost(username, postid, a_blog, request)) {
                 request.setAttribute("status", "SQL execution Error!");
-                SQLException_Handle(ex);
-            } finally {
-                try{conn.close();} catch (Exception e){}
-                try{rs.close();} catch (Exception e){}
-                try{pst.close();} catch (Exception e){}
+                return;
+            }
+            Blog blog = a_blog[0];
+            if (blog == null) {
+                request.setAttribute("get","no title or body; db no match");
+                if (title == null) {
+                    title = "";
+                }
+                if (body == null) {
+                    body = "";
+                }
+            } else {
+                if (title == null) {
+                    title = blog.title;
+                }
+                if (body == null) {
+                    body = blog.body;
+                }
             }
         }
+        request.setAttribute("title_h", title);
+        request.setAttribute("body_h", body);
         // valid request
         Parser parser = Parser.builder().build();
         Node titleN = parser.parse(title);
@@ -445,8 +424,8 @@ public class Editor extends HttpServlet {
         return;
     }
 
-    private Blog retrivePost (String username, String postid) {
-        Blog res = null;
+    private boolean retrivePost (String username, String postid, Blog[] res, HttpServletRequest request) {
+        res[0] = null;
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
         } catch (Exception ex){
@@ -463,23 +442,24 @@ public class Editor extends HttpServlet {
             pst.setInt(2, Integer.parseInt(postid));
             rs = pst.executeQuery();
             if(rs.next()){
-                res = new Blog();
-                blog.username = rs.getString("username");
-                blog.postid = rs.getInt("postid");
-                blog.title = title == null ? rs.getString("title") : title;
-                blog.body = body == null ? rs.getString("body") : body;
-                blog.created = rs.getString("created");
-                blog.modified = rs.getString("modified");
+                request.setAttribute("sql", "have data");
+                res[0] = new Blog();
+                res[0].username = rs.getString("username");
+                res[0].postid = rs.getInt("postid");
+                res[0].title = rs.getString("title");
+                res[0].body = rs.getString("body");
+                res[0].created = rs.getString("created");
+                res[0].modified = rs.getString("modified");
             }
         } catch (SQLException ex){
-            request.setAttribute("status", "SQL execution Error!");
             SQLException_Handle(ex);
+            return false;
         } finally {
             try{conn.close();} catch (Exception e){}
             try{rs.close();} catch (Exception e){}
             try{pst.close();} catch (Exception e){}
         }
-        return res;
+        return true;
     }
 
     private int updateNextid (String username, int postid) {

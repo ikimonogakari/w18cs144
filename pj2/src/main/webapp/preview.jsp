@@ -14,13 +14,15 @@ postid_quot = "\"" + postid_quot + "\"";
     <title>Preview Post</title>
 </head>
 <body>
+    <p><%= request.getAttribute("get") %></p>
+    <p><%= request.getAttribute("sql") %></p>
     <div><h1>Preview Post</h1></div>
     <div>
         <form action="post" method="POST">
             <input type="hidden" name="username" value=<%= username_quot %>>
             <input type="hidden" name="postid" value=<%= postid_quot %> >
-            <input type="hidden" name="title" value=<%= "\"" + request.getParameter("title") + "\"" %>>
-            <input type="hidden" name="body" value=<%= "\"" + request.getParameter("body") + "\"" %>>
+            <input type="hidden" name="title" value=<%= "\"" + request.getAttribute("title_h") + "\"" %>>
+            <input type="hidden" name="body" value=<%= "\"" + request.getAttribute("body_h") + "\"" %>>
             <button type="submit" name="action" value="open">Close Preview</button>
         </form>
     </div>
