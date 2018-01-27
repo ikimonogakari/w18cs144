@@ -205,6 +205,7 @@ public class Editor extends HttpServlet {
             newBlog.created = String.valueOf(currStamp);
             newBlog.modified = String.valueOf(currStamp);
             request.setAttribute("blog", newBlog);
+            request.setAttribute("newPost", "true");
             return;
         }
 
@@ -233,6 +234,7 @@ public class Editor extends HttpServlet {
                 blog.body = rs.getString("body");
                 blog.created = rs.getString("created");
                 blog.modified = rs.getString("modified");
+                request.setAttribute("newPost", "false");
             }
             if(blog == null){
                 if(!nextidMap.containsKey(username)){
@@ -248,9 +250,11 @@ public class Editor extends HttpServlet {
                 blog.body = "";
                 blog.created = String.valueOf(currStamp);
                 blog.modified = String.valueOf(currStamp);
+                request.setAttribute("newPost", "true");
             }
             request.setAttribute("status", "o0");
             request.setAttribute("blog", blog);
+            
         } catch (SQLException ex){
             request.setAttribute("status","o3");
             SQLException_Handle(ex);
@@ -433,6 +437,7 @@ public class Editor extends HttpServlet {
         String postid = String.valueOf(request.getParameter("postid"));
         String title = String.valueOf(request.getParameter("title"));
         String body = String.valueOf(request.getParameter("body"));
+        String npost = request.getParameter("newPost");
         if(username == null || username.trim().length() == 0){
             request.setAttribute("status", "s1");
             return;
@@ -459,12 +464,9 @@ public class Editor extends HttpServlet {
         try{
             conn = DriverManager.getConnection(DATABASE_HOST, "cs144", "");
             int postId = Integer.parseInt(postid);
-            boolean newPost = false;
-            if(!nextidMap.containsKey(username)){
-                nextidMap.put(username, 1);
-            }
 
-            if(postId + 1 == nextidMap.get(username)){
+            boolean newPost = false;
+            if(npost != null && npost.equals("true")){
                 newPost = true;
             }
             java.sql.Timestamp currStamp = getCurrTime();
