@@ -107,7 +107,7 @@ public class Editor extends HttpServlet {
                 request.getRequestDispatcher("/preview.jsp").forward(request, response);
             }
         } else {
-            request.setAttribute("status", "invalid-Do");
+            request.setAttribute("status", "invalid HTTP GET request");
             request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }
@@ -177,7 +177,7 @@ public class Editor extends HttpServlet {
                 request.getRequestDispatcher("/list.jsp").forward(request, response);
             }
         } else {
-            request.setAttribute("status", "invalid-Post");
+            request.setAttribute("status", "invalid HTTP POST request");
             request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }
@@ -244,7 +244,7 @@ public class Editor extends HttpServlet {
         String body = request.getParameter("body");
 
         Blog[] a_blog = new Blog[1];
-        if (!retrivePost(username, postid, a_blog, request)) {
+        if (!retrivePost(username, postid, a_blog)) {
             request.setAttribute("status", "SQL execution Error!");
             return;
         }
@@ -283,15 +283,13 @@ public class Editor extends HttpServlet {
         String title = request.getParameter("title");
         String body = request.getParameter("body");
         if(title == null || body == null){
-            request.setAttribute("get","no title or body");
             Blog[] a_blog = new Blog[1];
-            if (!retrivePost(username, postid, a_blog, request)) {
+            if (!retrivePost(username, postid, a_blog)) {
                 request.setAttribute("status", "SQL execution Error!");
                 return;
             }
             Blog blog = a_blog[0];
             if (blog == null) {
-                request.setAttribute("get","no title or body; db no match");
                 if (title == null) {
                     title = "";
                 }
@@ -348,19 +346,11 @@ public class Editor extends HttpServlet {
         PreparedStatement pst = null;
         try{
             conn = DriverManager.getConnection(DATABASE_HOST, "cs144", "");
-            int postId = Integer.parseInt(postid);
             java.sql.Timestamp currStamp = getCurrTime();
-            String sql = "UPDATE Posts SET title = (?), body = (?), modified = (?) WHERE username = ? AND postid = ?";
-            pst = conn.prepareStatement(sql);
-            pst.setString(1, title);
-            pst.setString(2, body);
-            pst.setTimestamp(3, currStamp);
-            pst.setString(4, username);
-            pst.setInt(5, postId);
-            int num = pst.executeUpdate();
-            // System.out.println("--- "+num);
-            if (num == 0) {
-                postId = updateNextid(username, -postId);
+            int postId = Integer.parseInt(postid);
+            String sql;
+            if (postId <= 0) {
+                postId = updateNextid(username);
                 sql = "INSERT INTO Posts (username, postid, title, body, modified, created) VALUES (?, ?, ?, ?, ?, ?)";
                 pst = conn.prepareStatement(sql);
                 pst.setString(1, username);
@@ -371,7 +361,14 @@ public class Editor extends HttpServlet {
                 pst.setTimestamp(6, currStamp);
                 pst.executeUpdate();
             } else {
-                updateNextid(username, postId);
+                sql = "UPDATE Posts SET title = (?), body = (?), modified = (?) WHERE username = ? AND postid = ?";
+                pst = conn.prepareStatement(sql);
+                pst.setString(1, title);
+                pst.setString(2, body);
+                pst.setTimestamp(3, currStamp);
+                pst.setString(4, username);
+                pst.setInt(5, postId);
+                int num = pst.executeUpdate();
             }
             request.setAttribute("status", "pass");
         } catch (SQLException ex){
@@ -426,7 +423,7 @@ public class Editor extends HttpServlet {
         return;
     }
 
-    private boolean retrivePost (String username, String postid, Blog[] res, HttpServletRequest request) {
+    private boolean retrivePost (String username, String postid, Blog[] res) {
         res[0] = null;
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -444,7 +441,6 @@ public class Editor extends HttpServlet {
             pst.setInt(2, Integer.parseInt(postid));
             rs = pst.executeQuery();
             if(rs.next()){
-                request.setAttribute("sql", "have data");
                 res[0] = new Blog();
                 res[0].username = rs.getString("username");
                 res[0].postid = rs.getInt("postid");
@@ -464,22 +460,15 @@ public class Editor extends HttpServlet {
         return true;
     }
 
-    private int updateNextid (String username, int postid) {
+    private int updateNextid (String username) {
         if(!nextidMap.containsKey(username)){
             nextidMap.put(username, 1);
             return 1;
-        } else if (postid >0) {                     // if get a id can be find in db
-            int curMax = nextidMap.get(username);
-            if (postid > curMax) {
-                postid = curMax+1;
-                nextidMap.put(username, postid);
-            }
-            return postid;
         } else {                                    // if get a id does not exist in db, use max
             int curMax = nextidMap.get(username);
-            postid = curMax+1;
-            nextidMap.put(username, postid);
-            return postid;
+            curMax++;
+            nextidMap.put(username, curMax);
+            return curMax;
         }
     }
 
@@ -487,7 +476,7 @@ public class Editor extends HttpServlet {
         // username is null
         String username = request.getParameter("username");
         if (username == null || username.trim().length() == 0) {
-            request.setAttribute("status", "err: username invalid!");
+            request.setAttribute("status", "err: Username missing!");
             return false;
         }
         parameters[0] = username;
@@ -495,17 +484,14 @@ public class Editor extends HttpServlet {
         if (parameters.length > 1) {
             String postid = request.getParameter("postid");
             if(postid == null || postid.trim().length() == 0){
-                request.setAttribute("status", "err: postid invalid!");
+                request.setAttribute("status", "err: Postid missing!");
                 return false;
             }
             if (!Pattern.matches("-?[0-9]+", postid)) {
-                request.setAttribute("status", "err: postid can only be numbers!");
+                request.setAttribute("status", "err: postid can only be integer numbers!");
                 return false;
             }
             int num = Integer.parseInt(postid);
-            if (num < 0) {
-                return false;
-            }
             parameters[1] = postid;
         }
         return true;

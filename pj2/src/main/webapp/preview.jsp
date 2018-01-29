@@ -30,9 +30,18 @@ postid_quot = "\"" + postid_quot + "\"";
             </button>
         </form>
     </nav>
-    <div class="container">
-        <div class="row">
+    <div class="container-fluid">
+        <div class="row-fluid">
             <div class="col-8">
+                <%
+                    String title_html = (String) request.getAttribute("title_html");
+                    String body_html = (String) request.getAttribute("body_html");
+                    if (title_html.equals("") && body_html.equals("")) {
+                        out.print("<blockquote class=\"blockquote text-center\">\n");
+                        out.print("<p class=\"text-muted\">Content is empty</p>\n");
+                        out.print("</blockquote>");
+                    }
+                %>
                 <div>
                     <div>
                         <h1><%= (String) request.getAttribute("title_html") %></h1>

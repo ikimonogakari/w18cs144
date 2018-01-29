@@ -34,11 +34,11 @@ Blog blog = (Blog) request.getAttribute("blog");
                         <input type="hidden" name="postid" value=<%= postid_quot %> >
                         <div>
                             <label for="title">Title</label>
-                            <input type="text" class="form-control form-control-lg" id="title" name="title" value=<%= "\""+blog.title+"\"" %>>
+                            <input type="text" class="form-control form-control-lg" id="title" name="title" value=<%= "\""+blog.title+"\"" %> placeholder="Enter title">
                         </div>
                         <div>
                             <label for="body">Body</label>
-                            <textarea class="form-control" id="body" rows="10" name="body"><%= blog.body %></textarea>
+                            <textarea class="form-control" id="body" rows="10" name="body" placeholder="Type Markdown"><%= blog.body %></textarea>
                         </div>
                     </div>
                 </form>
