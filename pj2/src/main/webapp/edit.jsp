@@ -26,8 +26,8 @@ Blog blog = (Blog) request.getAttribute("blog");
                     <div class="form-group">
                         <div class="btn-group" role="group">
                             <button type="submit" class="btn btn-outline-primary" name="action" value="save">Save</button>
-                            <button type="submit" class="btn btn-outline-info" name="action" value="list">Close</button>
-                            <button type="submit" class="btn btn-outline-warning" name="action" value="preview">Preview</button>
+                            <button type="submit" class="btn btn-outline-warning" name="action" value="list">Close</button>
+                            <button type="submit" class="btn btn-outline-info" name="action" value="preview">Preview</button>
                             <button type="submit" class="btn btn-outline-danger" name="action" value="delete">Delete</button>
                         </div>
                         <input type="hidden" name="username" value=<%= username_quot %> >
