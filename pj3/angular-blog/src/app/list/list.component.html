@@ -1,0 +1,14 @@
+<h2>list of posts</h2>
+<div>
+  <ul class="heroes">
+    <li *ngFor="let p of posts"
+      [class.selected]="p === selectedPost"
+      (click)="onSelect(p)">
+      <a routerLink="/edit/{{p.postid}}">
+        <span class="badge">{{p.postid}} </span>{{p.title}}
+      </a>
+    </li>
+  </ul>
+</div>
+
+<!--<app-edit [post]="selectedPost"></app-edit>-->
