@@ -20,6 +20,7 @@ export class ListComponent implements OnInit {
 
   newPost(): void {
     let t_post: Post = this.bs.newPost();
+    this.selectedPost = t_post;
   }
 
   onSelect(p: Post): void {

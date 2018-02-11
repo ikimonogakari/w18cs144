@@ -1,5 +1,6 @@
 <h2>list of posts</h2>
 <div>
+  <button type="button" (click)="newPost()">New Post</button>
   <ul class="heroes">
     <li *ngFor="let p of posts"
       [class.selected]="p === selectedPost"
@@ -11,4 +12,4 @@
   </ul>
 </div>
 
-<!--<app-edit [post]="selectedPost"></app-edit>-->
+<app-edit [post]="selectedPost"></app-edit>

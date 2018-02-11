@@ -15,7 +15,7 @@ export class BlogService {
       this.posts = [];
       this.maxId = 1;
     } else {
-      this.maxId = this.posts[this.posts.length-1].postid;
+      this.maxId = this.posts[this.posts.length-1].postid + 1;
     }
     /* for test */
     if (this.posts == null || this.posts.length == 0) {
