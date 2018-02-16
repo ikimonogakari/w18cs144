@@ -41,6 +41,7 @@ export class BlogService {
         return i;
       }
     }
+    return null;
   }
 
   newPost(): Post {

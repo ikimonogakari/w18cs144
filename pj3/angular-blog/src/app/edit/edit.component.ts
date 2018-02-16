@@ -31,6 +31,11 @@ export class EditComponent implements OnInit {
         let id : number = Number(params['id']);
         this.handleUnsaved();
         this.post = this.bs.getPost(id);
+        if (this.post == null) {
+          //console.log('null post');
+          //console.log(this.router.url);
+          this.router.navigateByUrl("error");
+        }
     });
   }
 
