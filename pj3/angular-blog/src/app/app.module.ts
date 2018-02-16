@@ -8,6 +8,7 @@ import { EditComponent } from './edit/edit.component';
 import { ListComponent } from './list/list.component';
 import { PreviewComponent } from './preview/preview.component';
 import { AppRoutingModule } from './app-routing.module';
+import { NotFoundComponent } from './not-found/not-found.component';
 
 
 @NgModule({
@@ -15,7 +16,8 @@ import { AppRoutingModule } from './app-routing.module';
     AppComponent,
     EditComponent,
     ListComponent,
-    PreviewComponent
+    PreviewComponent,
+    NotFoundComponent
   ],
   imports: [
     BrowserModule,

@@ -26,12 +26,12 @@ export class ListComponent implements OnInit {
   newPost(): void {
     let t_post: Post = this.bs.newPost();
     this.selectedPost = t_post;
-    this.router.navigate(['/edit', this.selectedPost.postid]);
+    this.router.navigate(['edit', this.selectedPost.postid]);
   }
 
   onSelect(p: Post): void {
     this.selectedPost = p;
-    this.router.navigate(['/edit', this.selectedPost.postid]);
+    this.router.navigate(['edit', this.selectedPost.postid]);
   }
 
 }

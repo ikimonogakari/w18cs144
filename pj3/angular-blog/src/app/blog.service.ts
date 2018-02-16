@@ -17,7 +17,7 @@ export class BlogService {
     } else {
       this.maxId = this.posts[this.posts.length-1].postid + 1;
     }
-    /* for test */
+    /* for test 
     if (this.posts == null || this.posts.length == 0) {
       let p1: Post = this.newPost();
       p1.title = 'title 1';
@@ -28,6 +28,7 @@ export class BlogService {
       p2.body = '- item 0';
       this.updatePost(p2);
     }
+    */
   };
 
   getPosts(): Post[] {
@@ -47,15 +48,15 @@ export class BlogService {
     newPost.postid = this.maxId;
     newPost.title = "";
     newPost.body = "";
-    newPost.created = new Date(Date.now() + new Date().getTimezoneOffset()*60*1000);
-    newPost.modified = new Date(newPost.created.getMilliseconds());
+    newPost.created = new Date(Date.now());
+    newPost.modified = new Date(Date.now());
     this.posts.push(newPost);
     this.maxId++;
     return newPost;
   }
 
   updatePost(post: Post): void {
-    post.modified = new Date(Date.now() + new Date().getTimezoneOffset()*60*1000);
+    post.modified = new Date(Date.now());
     for (let i in this.posts) {
       if (this.posts[i].postid == post.postid) {
         this.posts[i] = post;

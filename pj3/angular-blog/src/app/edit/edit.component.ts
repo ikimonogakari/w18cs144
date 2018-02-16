@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, HostListener } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { Post, BlogService } from '../blog.service'
@@ -42,11 +42,11 @@ export class EditComponent implements OnInit {
   delete(): void {
     this.bs.deletePost(this.post.postid);
     this.post = null;
-    this.router.navigate(['/']);
+    this.router.navigate(['']);
   }
 
   preview(): void {
-    this.router.navigate(['/preview', this.post.postid]);
+    this.router.navigate(['preview', this.post.postid]);
   }
 
   ngOnDestroy() {

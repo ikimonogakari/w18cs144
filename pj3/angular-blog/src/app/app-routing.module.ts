@@ -3,10 +3,13 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { EditComponent } from './edit/edit.component'
 import { PreviewComponent } from './preview/preview.component'
+import { NotFoundComponent } from './not-found/not-found.component'
 
 const routes: Routes = [
   { path: 'edit/:id', component: EditComponent },
-  { path: 'preview/:id', component: PreviewComponent}
+  { path: 'preview/:id', component: PreviewComponent},
+  { path: '', children: []},
+  { path: '**', component: NotFoundComponent }
 ];
 
 @NgModule({
