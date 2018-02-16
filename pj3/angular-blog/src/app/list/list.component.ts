@@ -34,4 +34,11 @@ export class ListComponent implements OnInit {
     this.router.navigate(['edit', this.selectedPost.postid]);
   }
 
+  updateClass(p : Post){
+    if (p === this.selectedPost) {
+      return "list-group-item d-flex justify-content-between align-items-center list-group-item-action active";
+    } else {
+      return "list-group-item d-flex justify-content-between align-items-center list-group-item-action";
+    }
+  }
 }
