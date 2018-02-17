@@ -1,15 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostBinding, OnInit, Input, HostListener, style } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { Parser, HtmlRenderer } from 'commonmark';
-import { Post, BlogService } from '../blog.service'
+import { Post, BlogService } from '../blog.service';
+import { slideInDownAnimation } from '../animations';
 
 @Component({
   selector: 'app-preview',
   templateUrl: './preview.component.html',
-  styleUrls: ['./preview.component.css']
+  styleUrls: ['./preview.component.css'],
+  animations: [ slideInDownAnimation ]
 })
 export class PreviewComponent implements OnInit {
+  @HostBinding('@routeAnimation') routeAnimation = true;
+  @HostBinding('style.display')   display = 'block';
+  @HostBinding('style.position')  position = 'absolute';
 
   private post: Post = null;
   private sub: any;

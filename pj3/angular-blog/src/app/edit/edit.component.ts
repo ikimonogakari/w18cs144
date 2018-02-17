@@ -1,17 +1,23 @@
-import { Component, OnInit, Input, HostListener } from '@angular/core';
+import { Component, HostBinding, OnInit, Input, HostListener, style } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
+import { slideInDownAnimation } from '../animations';
 
-import { Post, BlogService } from '../blog.service'
+import { Post, BlogService } from '../blog.service';
 
 @Component({
   selector: 'app-edit',
   templateUrl: './edit.component.html',
-  styleUrls: ['./edit.component.css']
+  styleUrls: ['./edit.component.css'],
+  animations: [ slideInDownAnimation ]
 })
 
 export class EditComponent implements OnInit {
+  @HostBinding('@routeAnimation') routeAnimation = true;
+  @HostBinding('style.display')   display = 'block';
+  @HostBinding('style.position')  position = 'absolute';
+
   private post: Post = null;
   private sub: any;
   private editor = new FormGroup({

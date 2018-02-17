@@ -20,12 +20,14 @@
         </textarea>
       </div>
     </div>
-    <div class="btn-group" role="group">
-        <button type="button" (click)="save()" class="btn btn-primary" [disabled]="editor.pristine">Save</button>
-        <button type="button" (click)="delete()" class="btn btn-danger">Delete</button>
-        <button type="button" (click)="preview()" class="btn btn-info">Preview</button>
-    </div>
-    <br>
+    <!-- <div class="btn-group" role="group"> -->
+        <button type="button" (click)="save()" class="btn btn-primary btn-lg" [disabled]="editor.pristine">Save</button>
+        
+        <button type="button" (click)="delete()" class="btn btn-danger btn-lg">Delete</button>
+        
+        <button type="button" (click)="preview()" class="btn btn-info btn-lg">Preview</button>
+    <!-- </div> -->
+    <br><br>
     <small id="emailHelp" class="form-text text-muted">Created Time: <span>{{post.created | date:'MM/dd/yyyy HH:mm:ss'}}</span></small>
     <small id="emailHelp" class="form-text text-muted">Modified Time: <span>{{post.modified | date:'MM/dd/yyyy HH:mm:ss'}}</span></small>
   </form>
