@@ -17,18 +17,6 @@ export class BlogService {
     } else {
       this.maxId = this.posts[this.posts.length-1].postid + 1;
     }
-    /* for test 
-    if (this.posts == null || this.posts.length == 0) {
-      let p1: Post = this.newPost();
-      p1.title = 'title 1';
-      p1.body = '**Body Title**';
-      this.updatePost(p1);
-      let p2: Post = this.newPost();
-      p2.title = 'title 2';
-      p2.body = '- item 0';
-      this.updatePost(p2);
-    }
-    */
   };
 
   getPosts(): Post[] {

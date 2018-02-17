@@ -32,8 +32,6 @@ export class EditComponent implements OnInit {
         this.handleUnsaved();
         this.post = this.bs.getPost(id);
         if (this.post == null) {
-          //console.log('null post');
-          //console.log(this.router.url);
           this.router.navigateByUrl("error");
         }
     });
@@ -61,7 +59,7 @@ export class EditComponent implements OnInit {
 
   @HostListener('window:beforeunload')
   handleUnsaved(){
-    if (this.post && !this.editor.pristine) {
+    if (this.post) {       //&& !this.editor.pristine
       console.log("unsaved modification");
       this.bs.updatePost(this.post);
     }
