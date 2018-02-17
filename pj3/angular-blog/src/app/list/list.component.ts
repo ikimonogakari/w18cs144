@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Post, BlogService } from '../blog.service';
-import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router, NavigationEnd } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 @Component({
@@ -12,6 +12,7 @@ import { Observable } from 'rxjs/Observable';
 export class ListComponent implements OnInit {
   posts: Post[];
   selectedPost: Post;
+  selectedId: number;
 
   constructor(
     private bs: BlogService,
@@ -21,6 +22,13 @@ export class ListComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.router.events.subscribe(
+      event => {
+        if (event instanceof NavigationEnd){
+          let child_route = this.aRoute.children[0].snapshot;
+          this.selectedId = Number(child_route.params['id']);
+        }
+    });
   }
 
   newPost(): void {
@@ -35,7 +43,7 @@ export class ListComponent implements OnInit {
   }
 
   updateClass(p : Post){
-    if (p === this.selectedPost) {
+    if (p.postid === this.selectedId) {
       return "list-group-item d-flex justify-content-between align-items-center list-group-item-action active";
     } else {
       return "list-group-item d-flex justify-content-between align-items-center list-group-item-action";
