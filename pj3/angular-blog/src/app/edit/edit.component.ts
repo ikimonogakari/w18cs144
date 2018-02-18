@@ -16,7 +16,7 @@ import { Post, BlogService } from '../blog.service';
 export class EditComponent implements OnInit {
   @HostBinding('@routeAnimation') routeAnimation = true;
   @HostBinding('style.display')   display = 'block';
-  @HostBinding('style.position')  position = 'absolute';
+  // @HostBinding('style.position')  position = 'absolute';
 
   private post: Post = null;
   private sub: any;
@@ -38,7 +38,7 @@ export class EditComponent implements OnInit {
         this.handleUnsaved();
         this.post = this.bs.getPost(id);
         if (this.post == null) {
-          this.router.navigateByUrl("error");
+          this.router.navigateByUrl('error');
         }
     });
   }
@@ -64,9 +64,9 @@ export class EditComponent implements OnInit {
   }
 
   @HostListener('window:beforeunload')
-  handleUnsaved(){
-    if (this.post) {       //&& !this.editor.pristine
-      console.log("unsaved modification");
+  handleUnsaved() {
+    if (this.post) {       // && !this.editor.pristine
+      console.log('unsaved modification');
       this.bs.updatePost(this.post);
     }
   }

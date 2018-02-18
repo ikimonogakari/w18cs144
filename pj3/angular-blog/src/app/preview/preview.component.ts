@@ -18,8 +18,8 @@ export class PreviewComponent implements OnInit {
 
   private post: Post = null;
   private sub: any;
-  private title : string;
-  private body : string;
+  private title: string;
+  private body: string;
 
   constructor(
     private bs: BlogService,
@@ -30,7 +30,7 @@ export class PreviewComponent implements OnInit {
   ngOnInit() {
     this.sub = this.aRoute.params.subscribe(
       params => {
-        let id : number = Number(params['id']);
+        let id: number = Number(params['id']);
         this.post = this.bs.getPost(id);
         this.renderHTML();
     });
@@ -43,7 +43,7 @@ export class PreviewComponent implements OnInit {
     this.body = writer.render(reader.parse(this.post.body));
   }
 
-  back():void {
+  back(): void {
     this.router.navigate(['edit', this.post.postid]);
   }
 }

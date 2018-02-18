@@ -11,11 +11,11 @@ export class BlogService {
 
   fetchPosts(): void {
     this.posts = <Post[]> JSON.parse(localStorage.getItem('postList'));
-    if (this.posts == null || this.posts.length == 0) {
+    if (this.posts == null || this.posts.length === 0) {
       this.posts = [];
       this.maxId = 1;
     } else {
-      this.maxId = this.posts[this.posts.length-1].postid + 1;
+      this.maxId = this.posts[this.posts.length - 1].postid + 1;
     }
   };
 
@@ -25,7 +25,7 @@ export class BlogService {
 
   getPost(id: number): Post {
     for (let i of this.posts) {
-      if (i.postid == id) {
+      if (i.postid === id) {
         return i;
       }
     }
@@ -35,8 +35,8 @@ export class BlogService {
   newPost(): Post {
     let newPost: Post = new Post();
     newPost.postid = this.maxId;
-    newPost.title = "";
-    newPost.body = "";
+    newPost.title = '';
+    newPost.body = '';
     newPost.created = new Date(Date.now());
     newPost.modified = new Date(Date.now());
     this.posts.push(newPost);
@@ -47,7 +47,7 @@ export class BlogService {
   updatePost(post: Post): void {
     post.modified = new Date(Date.now());
     for (let i in this.posts) {
-      if (this.posts[i].postid == post.postid) {
+      if (this.posts[i].postid === post.postid) {
         this.posts[i] = post;
         break;
       }
@@ -57,7 +57,7 @@ export class BlogService {
 
   deletePost(id: number): void {
     for (let i in this.posts) {
-      if (this.posts[i].postid == id) {
+      if (this.posts[i].postid === id) {
         this.posts.splice(Number(i), 1);
         break;
       }

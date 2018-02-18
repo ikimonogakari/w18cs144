@@ -24,7 +24,7 @@ export class ListComponent implements OnInit {
   ngOnInit() {
     this.router.events.subscribe(
       event => {
-        if (event instanceof NavigationEnd){
+        if (event instanceof NavigationEnd) {
           let child_route = this.aRoute.children[0].snapshot;
           this.selectedId = Number(child_route.params['id']);
         }
@@ -42,11 +42,11 @@ export class ListComponent implements OnInit {
     this.router.navigate(['edit', this.selectedPost.postid]);
   }
 
-  updateClass(p : Post){
+  updateClass(p: Post) {
     if (p.postid === this.selectedId) {
-      return "list-group-item d-flex justify-content-between align-items-center list-group-item-action active";
+      return 'list-group-item d-flex justify-content-between align-items-center list-group-item-action active';
     } else {
-      return "list-group-item d-flex justify-content-between align-items-center list-group-item-action";
+      return 'list-group-item d-flex justify-content-between align-items-center list-group-item-action';
     }
   }
 }
