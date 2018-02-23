@@ -4,15 +4,19 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var mongo = require('mongodb')
 
 var index = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
 
+var db = require('./db');
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -43,4 +47,22 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+// setup mongodb
+
+var dbUrl = 'mongodb://localhost:27017/BlogServer';
+db.connect(dbUrl, function(err){
+	if(err){
+		console.log('Something went wrong when connecting to MongoDB');
+		process.exit(1);
+	} else {
+		console.log('Successfully connected!');
+	}
+});
+
+/*
+app.get('/blog', function(req, res){
+	var username = req.params.username;
+	var postid = req.params.postid;
+})
+*/
 module.exports = app;
