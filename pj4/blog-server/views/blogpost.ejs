@@ -4,6 +4,15 @@
 	<title>Post page</title>
 </head>
 <body>
-
+	<h2>Search Result - Precise</h2>
+	<% posts.forEach(function(post){ %>
+			Postid: <%= post.postid %><br>
+			Username: <%= post.username %><br>
+			Title: <%= post.title %><br>
+			Body: <%= post.body %><br>
+			<br>
+			Created date: <%= new Date(post.created) %> <br>
+			Modified date: <%= new Date(post.modified) %> <br>
+	<% }) %>	
 </body>
 </html>
