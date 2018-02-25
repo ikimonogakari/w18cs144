@@ -1,29 +1,41 @@
-var MongoClient = require('mongodb').MongoClient;
+const
+	MongoClient = require('mongodb').MongoClient,
+	dbUrl = 'mongodb://localhost:27017',
+	dbName = 'BlogServer';
 
-var conn = {
-	db:null,
-}
-
-exports.connect = function(url, done){
-	if(conn.db) return done();
-
-	MongoClient.connect(url, function(err, dbConn){
-		if(err){return done(err);}
-		conn.db = dbConn;
-		done();
+var connect = function(){
+	return new Promise((resovle, reject) => {
+		MongoClient.connect(dbUrl, (err, db) => {
+			if (err) {
+				reject(err);
+			} else {
+				console.log('Successfully connected !');
+				resovle(db);
+			}
+		});
 	});
 }
 
-exports.get = function(){
-	return conn.db;
-}
-
-exports.close = function(done){
-	if(conn.db){
-		conn.db.close(function(err, result){
-			conn.db = null
-			conn.mode = null
-			done(err)
-		})
-	}
+exports.findDocuments = function (collName, queryParams, callback) {
+	let db = null;
+	connect()
+	.then((dbClient) => {
+		db = dbClient;
+		return db.db(dbName).collection(collName);
+	})
+	.then((collection) => {
+		console.log('query patterns are:');
+		console.log(queryParams);
+		return collection.find(queryParams);
+	})
+	.then(cursor => cursor.toArray())
+	.then((result) => {
+		console.log(result);
+		callback(result);
+		db.close();
+	})
+	.catch((err) => {
+		console.log('error: mongodb operations');
+		console.error(err);
+	}) 
 }
