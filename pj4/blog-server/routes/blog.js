@@ -3,23 +3,6 @@ var router = express.Router();
 // var mongo = require('mongodb')
 var mongo = require('../db');
 
-// Read operation
-var findDocuments = function(collName, queryParams, callback){
-	let db = null;
-	
-	var collection = db.get().db(dbName).collection(collName);
-	console.log(queryParams);
-	collection.find(queryParams).toArray(function(err, docs){
-		if(err){
-			console.log('Error happens in read process.');
-			callback();
-		} else {
-			console.log(docs);
-			callback(docs);
-		}
-    });
-};
-
 router.get('/:username/:postid', function(req, res){
 	var username = req.params.username;
 	var postid = req.params.postid;

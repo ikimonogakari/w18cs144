@@ -1,4 +1,10 @@
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
+
+import { Observable } from 'rxjs/Observable';
+import { of } from 'rxjs/observable/of';
+import { catchError } from 'rxjs/operators';
 
 @Injectable()
 export class BlogService {
@@ -33,6 +39,7 @@ export class BlogService {
   }
 
   newPost(): Post {
+    // only need to send username, postid, title and body
     let newPost: Post = new Post();
     newPost.postid = this.maxId;
     newPost.title = '';
@@ -45,6 +52,7 @@ export class BlogService {
   }
 
   updatePost(post: Post): void {
+    // only need to send title and body
     post.modified = new Date(Date.now());
     for (let i in this.posts) {
       if (this.posts[i].postid === post.postid) {
