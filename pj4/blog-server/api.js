@@ -23,8 +23,8 @@ router.get('/:username/:postid', function(req, res, next){
         if (docs.length === 0) {
             res.sendStatus(404);
         } else {
-            let plainRes = JSON.stringify(docs);
-            res.send(plainRes);
+            // let plainRes = JSON.stringify(docs);
+            res.send(docs);
         }
     });
 });

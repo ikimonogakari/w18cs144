@@ -36,10 +36,12 @@ export class EditComponent implements OnInit {
       params => {
         let id : number = Number(params['id']);
         this.handleUnsaved();
-        this.post = this.bs.getPost(id);
-        if (this.post == null) {
-          this.router.navigateByUrl('error');
-        }
+        setTimeout(() => {
+          this.post = this.bs.getPost(id);
+          if (this.post == null) {
+            this.router.navigateByUrl('error');
+          }
+        },500);
     });
   }
 
@@ -66,7 +68,7 @@ export class EditComponent implements OnInit {
   @HostListener('window:beforeunload')
   handleUnsaved() {
     if (this.post) {       // && !this.editor.pristine
-      console.log('unsaved modification');
+      // console.log('unsaved modification');
       this.bs.updatePost(this.post);
     }
   }

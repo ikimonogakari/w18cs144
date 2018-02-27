@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
+import { CookieService } from 'angular2-cookie/services/cookies.service';
 
 import { AppComponent } from './app.component';
 import { BlogService } from './blog.service';
@@ -29,7 +30,9 @@ import { NotFoundComponent } from './not-found/not-found.component';
     BrowserAnimationsModule,
     HttpClientModule
   ],
-  providers: [BlogService],
+  providers: [BlogService,
+    CookieService
+  ],
   bootstrap: [AppComponent],
   exports: [AppComponent]
 })
