@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Login Page</title>
+</head>
+<body>
+	<h1>Login to your blog</h1>
+	<form name="loginform" action="/login" methon="get" onsubmit="return preprocess();">
+		Username: <br>
+		<input type="text" name="username"/><br>
+		Password: <br>
+		<input type="text" name="password"/><br>
+		<input type="hidden" name="redirect" value=<%- redirectUrl %>
+		<input type="submit" value="Submit"/><br>
+	</form>
+		<% if(notice){ %>
+			<%- notice %>
+		<% } %>
+</body>
+<script>
+	function preprocess(){
+		var bcrypt = require('bcrypt');
+		var textpswd = document.loginform.password;
+		document.loginform.password = bcrypt.hashSync(textpswd, 10);
+		console.log(document.loginform.password);
+		return true;
+	}
+</script>
+</html>
